@@ -7,8 +7,8 @@ public class DeckOfCards {
     private final char[] suit = {'S','H','D','C'};
 
     ArrayList<PlayingCard> cards = new ArrayList<>();
+    ArrayList<PlayingCard> hand = new ArrayList<>();
 
-    //Making the deck of cards with 13 cards per shape
     public DeckOfCards(){
         for(int i = 1; i<=13; i++){
             cards.add(new PlayingCard(suit[0],i));
@@ -22,24 +22,35 @@ public class DeckOfCards {
     }
 
     public ArrayList<PlayingCard> dealHand(int n){
-        if(cards.size()<n){
-            throw new IllegalArgumentException("no can do");
+        if (cards.size() < n) {
+            throw new IllegalArgumentException("You don't have enough cards to deal a hand.");
         }
-        ArrayList<PlayingCard> hand = new ArrayList<>();
+
+        hand.clear();
+
         Random rand = new Random();
-        for(int i = 0; i < n; i++){
-            int r = rand.nextInt(52);
-            while(hand.contains(cards.get(r))){
-                r = rand.nextInt(52);
-            }
+        for (int i = 0; i < n; i++) {
+            int r = rand.nextInt(cards.size());
             PlayingCard c = cards.get(r);
             hand.add(c);
-        }
-        for(PlayingCard c : hand){
-            cards.remove(c);
+            cards.remove(r);
         }
 
         return hand;
+    }
+
+    public ArrayList<PlayingCard> getDealtCards(){
+        return hand;
+    }
+
+    public Boolean checkFlush(ArrayList<PlayingCard> handCards) {
+        char suit = handCards.get(0).getSuit();
+        for (int i = 1; i < handCards.size(); i++) {
+            if (handCards.get(i).getSuit() != suit) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }
