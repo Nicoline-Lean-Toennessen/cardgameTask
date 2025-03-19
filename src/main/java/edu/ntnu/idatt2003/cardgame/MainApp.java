@@ -122,7 +122,6 @@ public class MainApp extends Application {
                 .forEach(hbox.getChildren()::add);
     }
 
-
     public static void main(String[] args) {
         launch(args);
     }
