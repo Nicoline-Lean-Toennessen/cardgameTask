@@ -1,16 +1,13 @@
 package edu.ntnu.idatt2003.cardgame;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Box;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -19,15 +16,18 @@ import java.util.Objects;
 public class MainApp extends Application {
     DeckOfCards deck = new DeckOfCards();
     HBox hbox = new HBox(40);
+    VBox buttonBox = new VBox(20);
+    HBox infoContainer = new HBox(10);
+    PlayingCard queen = deck.getCards().get(44);
+
 
     @Override
     public void start(Stage primaryStage) {
         Pane pane = new Pane();
-        hbox.setAlignment(Pos.BOTTOM_LEFT); // or Pos.BOTTOM_CENTER, etc.
+        hbox.setAlignment(Pos.BOTTOM_LEFT);
         hbox.setLayoutY(50);
         hbox.setLayoutX(100);
         hbox.setId("tableBox");
-
 
         Button dealButton = new Button("Deal hand");
         dealButton.setId("dealButton");
@@ -37,8 +37,6 @@ public class MainApp extends Application {
         checkButton.setId("checkButton");
         checkButton.setOnAction(this::handleCheckButton);
 
-
-        VBox buttonBox = new VBox(20);
         buttonBox.setLayoutY(100);
         buttonBox.setLayoutX(1000);
         buttonBox.setId("buttonBox");
@@ -47,28 +45,70 @@ public class MainApp extends Application {
 
         pane.getChildren().add(hbox);
         pane.getChildren().add(buttonBox);
+        pane.getChildren().add(infoContainer);
 
-        StackPane root = new StackPane();
-        root.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
-        root.getChildren().add(pane);
 
-        Scene scene = new Scene(root,600,600);
-        primaryStage.setTitle("My JavaFX Window");
+        pane.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
+
+
+        Scene scene = new Scene(pane, 600, 600);
+        primaryStage.setTitle("Card game task");
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
         primaryStage.show();
     }
 
     private void handleCheckButton(ActionEvent actionEvent) {
+        infoContainer.getChildren().clear();
+        String nrOfHearts = "";
+        int sum = 0;
+        for (PlayingCard p : deck.getDealtCards()) {
+            if (p.getSuit() == ('H')) {
+                nrOfHearts += p.getAsString();
+            }
+            sum += p.getFace();
+        }
+        if(nrOfHearts.equals("")) {
+            nrOfHearts = "No hearts";
+        }
 
+        Boolean queenBool = false;
+
+        if (deck.getDealtCards().contains(queen)) {
+            queenBool = true;
+        }
+
+        infoContainer.setId("infoContainer");
+        infoContainer.setLayoutX(200);
+        infoContainer.setLayoutY(550);
+        
+        VBox leftInfo = new VBox(10);
+        leftInfo.setId("leftInfo");
+        leftInfo.getChildren().add(new Text("Sum of the faces: " + sum));
+        leftInfo.getChildren().add(new Text("Flush: " + deck.checkFlush(deck.getDealtCards())));
+
+        VBox rightInfo = new VBox(10);
+        rightInfo.setId("rightInfo");
+        rightInfo.getChildren().add(new Text("Cards of hearts: " + nrOfHearts));
+        rightInfo.getChildren().add(new Text("Queen of spades: " + queenBool));
+
+        infoContainer.getChildren().addAll(leftInfo, rightInfo);
     }
 
     private void handleDealButton(ActionEvent actionEvent) {
         hbox.getChildren().clear();
-        for(PlayingCard pc : deck.dealHand(5)){
+        if(deck.getCards().size()<5) {
+            Text text = new Text("You dont have enough cards for a new hand");
+            text.setStyle("-fx-font-size: 22px");
+           hbox.getChildren().add(text);
+        }
+
+        deck.dealHand(5);
+
+        for (PlayingCard pc : deck.getDealtCards()) {
             VBox playCard = new VBox();
             playCard.setAlignment(Pos.CENTER);
-            Text nrText = new Text(""+pc.getFace());
+            Text nrText = new Text("" + pc.getFace());
             nrText.setStyle("-fx-font-size: 20px");
             playCard.getChildren().add(nrText);
             playCard.getChildren().add(pc.getImageIcon(pc.getSuit()));
@@ -76,7 +116,6 @@ public class MainApp extends Application {
             hbox.getChildren().add(playCard);
         }
     }
-
 
     public static void main(String[] args) {
         launch(args);

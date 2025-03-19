@@ -31,3 +31,10 @@
     -fx-min-height: 200px;
     -fx-max-height: 200px;
 }
+#infoContainer{
+    -fx-pref-height: 200px;
+    -fx-pref-width: 300px;
+}
+#leftInfo, #rightInfo{
+    -fx-font-size: 16px;
+}
