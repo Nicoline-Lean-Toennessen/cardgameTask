@@ -60,28 +60,28 @@ public class MainApp extends Application {
 
     private void handleCheckButton(ActionEvent actionEvent) {
         infoContainer.getChildren().clear();
-        String nrOfHearts = "";
-        int sum = 0;
-        for (PlayingCard p : deck.getDealtCards()) {
-            if (p.getSuit() == ('H')) {
-                nrOfHearts += p.getAsString();
-            }
-            sum += p.getFace();
-        }
-        if(nrOfHearts.equals("")) {
+
+
+        int sum = deck.getDealtCards().stream()
+                .mapToInt(PlayingCard::getFace)
+                .sum();
+
+
+        String nrOfHearts = deck.getDealtCards().stream()
+                .filter(p -> p.getSuit() == 'H')
+                .map(PlayingCard::getAsString)
+                .reduce("", (acc, cardStr) -> acc + cardStr);
+
+        if (nrOfHearts.isEmpty()) {
             nrOfHearts = "No hearts";
         }
 
-        Boolean queenBool = false;
-
-        if (deck.getDealtCards().contains(queen)) {
-            queenBool = true;
-        }
+        boolean queenBool = deck.getDealtCards().contains(queen);
 
         infoContainer.setId("infoContainer");
         infoContainer.setLayoutX(200);
         infoContainer.setLayoutY(550);
-        
+
         VBox leftInfo = new VBox(10);
         leftInfo.setId("leftInfo");
         leftInfo.getChildren().add(new Text("Sum of the faces: " + sum));
@@ -95,27 +95,33 @@ public class MainApp extends Application {
         infoContainer.getChildren().addAll(leftInfo, rightInfo);
     }
 
+
     private void handleDealButton(ActionEvent actionEvent) {
         hbox.getChildren().clear();
-        if(deck.getCards().size()<5) {
-            Text text = new Text("You dont have enough cards for a new hand");
+
+        if (deck.getCards().size() < 5) {
+            Text text = new Text("You don't have enough cards for a new hand");
             text.setStyle("-fx-font-size: 22px");
-           hbox.getChildren().add(text);
+            hbox.getChildren().add(text);
+            return;
         }
 
         deck.dealHand(5);
 
-        for (PlayingCard pc : deck.getDealtCards()) {
-            VBox playCard = new VBox();
-            playCard.setAlignment(Pos.CENTER);
-            Text nrText = new Text("" + pc.getFace());
-            nrText.setStyle("-fx-font-size: 20px");
-            playCard.getChildren().add(nrText);
-            playCard.getChildren().add(pc.getImageIcon(pc.getSuit()));
-            playCard.setId("playCard");
-            hbox.getChildren().add(playCard);
-        }
+        deck.getDealtCards().stream()
+                .map(pc -> {
+                    VBox playCard = new VBox();
+                    playCard.setAlignment(Pos.CENTER);
+                    Text nrText = new Text("" + pc.getFace());
+                    nrText.setStyle("-fx-font-size: 20px");
+                    playCard.getChildren().add(nrText);
+                    playCard.getChildren().add(pc.getImageIcon(pc.getSuit()));
+                    playCard.setId("playCard");
+                    return playCard;
+                })
+                .forEach(hbox.getChildren()::add);
     }
+
 
     public static void main(String[] args) {
         launch(args);
